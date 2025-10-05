@@ -45,16 +45,4 @@ class CryptoVolumeBot:
             result_text = "🎯 **ارزهای با حجم امروز بیشتر از مجموع 3 روز گذشته:**\n\n"
             
             for i, coin in enumerate(qualified_coins, 1):
-                increase_percent = (coin['volume_increase_ratio'] - 1) * 100
-                result_text += f"{i}. **{coin['name']}** ({coin['symbol']})\n"
-                result_text += f"   💰 قیمت: ${coin['current_price']:,.2f}\n"
-                result_text += f"   📈 افزایش حجم: {increase_percent:+.1f}%\n"
-                result_text += f"   🏦 مارکت‌کپ: ${coin['market_cap']:,.0f}\n"
-                result_text += f"   🔥 حجم امروز: ${coin['today_volume']:,.0f}\n"
-                result_text += f"   📊 حجم ۳ روز گذشته: ${coin['last_3_days_volume']:,.0f}\n\n"
-            
-            # اضافه کردن تاریخ به پیام
-            from datetime import datetime
-            result_text += f"🕒 آخرین بروزرسانی: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            
-            # ارسال پیام (تقسیم در صورت طول
+                increase_percent = (coin['volume_increase_ratio'] - 1
