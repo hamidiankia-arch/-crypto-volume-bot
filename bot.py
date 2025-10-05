@@ -1,10 +1,9 @@
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from config import BOT_TOKEN, ADMIN_ID
+from config import BOT_TOKEN
 from crypto_analyzer import CryptoAnalyzer
 
-# تنظیمات لاگ
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -15,54 +14,42 @@ class CryptoVolumeBot:
         self.analyzer = CryptoAnalyzer()
     
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        welcome_text = """
-        🤖 ربات تحلیل حجم معاملات ارزهای دیجیتال
-        
-        برای دریافت لیست ارزهایی که حجم معاملات امروزشان از مجموع 3 روز گذشته بیشتر است، از دستور زیر استفاده کنید:
-        
-        /volume
-        """
+        welcome_text = "🤖 ربات تحلیل حجم ارزهای دیجیتال\n\n/volume - دریافت تحلیل"
         await update.message.reply_text(welcome_text)
     
     async def volume_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text("🔄 در حال آنالیز داده‌های بازار... لطفاً منتظر بمانید.")
+        await update.message.reply_text("🔄 در حال آنالیز...")
         
         try:
-            qualified_coins = self.analyzer.analyze_volume_condition()
+            coins = self.analyzer.analyze_volume_condition()
             
-            if not qualified_coins:
-                await update.message.reply_text("❌ هیچ ارزی با این شرط یافت نشد.")
+            if not coins:
+                await update.message.reply_text("❌ هیچ ارزی یافت نشد.")
                 return
             
-            result_text = "🎯 ارزهای با حجم امروز بیشتر از مجموع 3 روز گذشته:\n\n"
-            
-            for i, coin in enumerate(qualified_coins, 1):
-                increase_percent = (coin['volume_increase_ratio'] - 1) * 100
+            result_text = "🎯 ارزهای واجد شرط:\n\n"
+            for i, coin in enumerate(coins, 1):
+                increase = (coin['volume_increase_ratio'] - 1) * 100
                 result_text += f"{i}. {coin['name']} ({coin['symbol']})\n"
-                result_text += f"   قیمت: ${coin['current_price']:,.2f}\n"
-                result_text += f"   افزایش حجم: {increase_percent:+.1f}%\n\n"
-            
-            from datetime import datetime
-            result_text += f"🕒 آخرین بروزرسانی: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                result_text += f"   افزایش حجم: {increase:+.1f}%\n\n"
             
             await update.message.reply_text(result_text)
                 
         except Exception as e:
-            logging.error(f"Error in volume command: {e}")
-            await update.message.reply_text("❌ خطایی در دریافت داده‌ها رخ داد.")
+            await update.message.reply_text("❌ خطا در دریافت داده‌ها")
 
 def main():
     if not BOT_TOKEN:
-        raise ValueError("لطفاً BOT_TOKEN را در فایل .env تنظیم کنید")
+        raise ValueError("BOT_TOKEN تنظیم نشده")
     
-    application = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).build()
     bot = CryptoVolumeBot()
     
-    application.add_handler(CommandHandler("start", bot.start_command))
-    application.add_handler(CommandHandler("volume", bot.volume_command))
+    app.add_handler(CommandHandler("start", bot.start_command))
+    app.add_handler(CommandHandler("volume", bot.volume_command))
     
     print("🤖 ربات فعال شد...")
-    application.run_polling()
+    app.run_polling()
 
 if __name__ == '__main__':
     main()
