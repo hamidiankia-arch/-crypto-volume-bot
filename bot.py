@@ -1,27 +1,25 @@
-import logging
+cat > simple_bot.py << 'EOF'
+import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from config import BOT_TOKEN
 
-logging.basicConfig(level=logging.INFO)
+BOT_TOKEN = "8399544330:AAGwga10CEep0mUMDdiZRn44V5JcWYLERhA"
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("سلام! من فعال شدم ✅")
+
+async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("تست موفق ✅")
 
 def main():
-    if not BOT_TOKEN:
-        raise ValueError("BOT_TOKEN not set")
-    
     app = Application.builder().token(BOT_TOKEN).build()
-    
-    async def start(update, context):
-        await update.message.reply_text("🤖 ربات فعال شد! از /volume استفاده کنید")
-    
-    async def volume(update, context):
-        await update.message.reply_text("📊 تحلیل حجم در حال توسعه... به زودی")
-    
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("volume", volume))
-    
-    print("🤖 ربات فعال شد...")
+    app.add_handler(CommandHandler("test", test))
+    print("ربات اجرا شد...")
     app.run_polling()
 
 if __name__ == '__main__':
     main()
+EOF
+
+python simple_bot.py
